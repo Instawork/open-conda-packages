@@ -1,0 +1,42 @@
+context:
+  model_name: ms-marco-MiniLM-L-12-v2
+  # Commit date of hf_revision; upstream has no release versions.
+  version: "2024.8.14"
+  hf_revision: 858a1ac046a05663a35367eac852d7f76feeefdd
+  model_dir: share/flashrank/${{ model_name }}
+
+package:
+  name: flashrank-ms-marco-minilm-l-12-v2
+  version: ${{ version }}
+
+source:
+  url: https://huggingface.co/prithivida/flashrank/resolve/${{ hf_revision }}/${{ model_name }}.zip
+  sha256: bdd3772b651ffc34f70e414049285bb55ccc6d1b8e29d0640f836d44f70ec77a
+
+build:
+  number: 0
+  noarch: generic
+  dynamic_linking:
+    binary_relocation: false
+  prefix_detection:
+    ignore: true
+  script:
+    - mkdir -p $PREFIX/${{ model_dir }}
+    # Explicit list: the zip also ships __MACOSX/ and .DS_Store.
+    - for f in flashrank-MiniLM-L-12-v2_Q.onnx config.json tokenizer.json tokenizer_config.json special_tokens_map.json; do install -m 644 ${{ model_name }}/$f $PREFIX/${{ model_dir }}/$f; done
+
+tests:
+  - package_contents:
+      strict: true
+      files:
+        - ${{ model_dir }}/flashrank-MiniLM-L-12-v2_Q.onnx
+        - ${{ model_dir }}/config.json
+        - ${{ model_dir }}/tokenizer.json
+        - ${{ model_dir }}/tokenizer_config.json
+        - ${{ model_dir }}/special_tokens_map.json
+
+about:
+  homepage: https://huggingface.co/prithivida/flashrank
+  # From the prithivida/flashrank model card; the zip ships no license file.
+  license: CC-BY-SA-4.0
+  summary: FlashRank ms-marco-MiniLM-L-12-v2 ONNX reranker as a cache_dir under share/flashrank

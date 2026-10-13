@@ -1,0 +1,58 @@
+context:
+  # Date of the pinned qdrant/all-MiniLM-L6-v2-onnx commit; upstream has no release versions.
+  version: "2026.09.30"
+  hf_repo: qdrant/all-MiniLM-L6-v2-onnx
+  revision: d13954661f83248295ba75c1ed411eef3b7b936e
+  hf_base: https://huggingface.co/${{ hf_repo }}/resolve/${{ revision }}
+  cache_dir: share/fastembed/models--qdrant--all-MiniLM-L6-v2-onnx
+
+package:
+  name: fastembed-all-minilm-l6-v2
+  version: ${{ version }}
+
+source:
+  - url: ${{ hf_base }}/model.onnx
+    sha256: bbd7b466f6d58e646fdc2bd5fd67b2f5e93c0b687011bd4548c420f7bd46f0c5
+    file_name: model.onnx
+  - url: ${{ hf_base }}/config.json
+    sha256: 1b4d8e2a3988377ed8b519a31d8d31025a25f1c5f8606998e8014111438efcd7
+    file_name: config.json
+  - url: ${{ hf_base }}/tokenizer.json
+    sha256: 851ca67100d372ca3ae031a6abd168f53489eebfd7d89523f35c5c9b4d372c3c
+    file_name: tokenizer.json
+  - url: ${{ hf_base }}/tokenizer_config.json
+    sha256: abda01c8c14c5151ae498aceb30db406d6b91242c394fd88d3b6fd5a63a101e6
+    file_name: tokenizer_config.json
+  - url: ${{ hf_base }}/special_tokens_map.json
+    sha256: 5d5b662e421ea9fac075174bb0688ee0d9431699900b90662acd44b2a350503a
+    file_name: special_tokens_map.json
+
+build:
+  number: 0
+  noarch: generic
+  dynamic_linking:
+    binary_relocation: false
+  prefix_detection:
+    ignore: true
+  # huggingface_hub cache layout without symlinks: refs/main -> snapshots/<rev>/<real files>.
+  # refs/main must not end with a newline; huggingface_hub reads it verbatim.
+  script:
+    - mkdir -p $PREFIX/${{ cache_dir }}/refs $PREFIX/${{ cache_dir }}/snapshots/${{ revision }}
+    - printf '%s' "${{ revision }}" > $PREFIX/${{ cache_dir }}/refs/main
+    - for f in model.onnx config.json tokenizer.json tokenizer_config.json special_tokens_map.json; do install -m 644 "$f" $PREFIX/${{ cache_dir }}/snapshots/${{ revision }}/"$f"; done
+
+tests:
+  - package_contents:
+      strict: true
+      files:
+        - ${{ cache_dir }}/refs/main
+        - ${{ cache_dir }}/snapshots/${{ revision }}/model.onnx
+        - ${{ cache_dir }}/snapshots/${{ revision }}/config.json
+        - ${{ cache_dir }}/snapshots/${{ revision }}/tokenizer.json
+        - ${{ cache_dir }}/snapshots/${{ revision }}/tokenizer_config.json
+        - ${{ cache_dir }}/snapshots/${{ revision }}/special_tokens_map.json
+
+about:
+  homepage: https://huggingface.co/qdrant/all-MiniLM-L6-v2-onnx
+  license: Apache-2.0
+  summary: all-MiniLM-L6-v2 ONNX model as a FastEmbed cache under share/fastembed

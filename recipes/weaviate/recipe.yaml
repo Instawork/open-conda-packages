@@ -1,0 +1,44 @@
+context:
+  version: "1.29.2"
+  base_url: https://github.com/weaviate/weaviate/releases/download/v${{ version }}
+
+package:
+  name: weaviate
+  version: ${{ version }}
+
+source:
+  - if: osx
+    then:
+      url: ${{ base_url }}/weaviate-v${{ version }}-darwin-all.zip
+      sha256: e39d7f720563f5f898ba279435c2f38d98848e0710ecf66aa63937cf35ea8b66
+  - if: linux and x86_64
+    then:
+      url: ${{ base_url }}/weaviate-v${{ version }}-linux-amd64.tar.gz
+      sha256: f5361df8b866b82cec0d54d65a5708ee69db2fa34752577a72e5c3261264dd6a
+  - if: linux and aarch64
+    then:
+      url: ${{ base_url }}/weaviate-v${{ version }}-linux-arm64.tar.gz
+      sha256: 77f1b7c0aab56ff41048d01c2ef24820144f39283100e09daff14a5b9f87957b
+
+build:
+  number: 0
+  skip:
+    - win
+  dynamic_linking:
+    # Upstream ships static Go binaries; rewriting them would break the macOS signature.
+    binary_relocation: false
+  prefix_detection:
+    ignore: true
+  script:
+    - mkdir -p $PREFIX/bin
+    - install -m 755 weaviate $PREFIX/bin/weaviate
+
+tests:
+  - script:
+      - weaviate --help
+
+about:
+  homepage: https://weaviate.io
+  license: BSD-3-Clause
+  license_file: LICENSE
+  summary: Weaviate vector database server, repackaged from upstream release binaries

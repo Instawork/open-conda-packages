@@ -1,0 +1,54 @@
+context:
+  version: "0.19.2"
+  base_url: https://github.com/dunglas/mercure/releases/download/v${{ version }}
+
+package:
+  name: mercure
+  version: ${{ version }}
+
+source:
+  - if: osx and arm64
+    then:
+      url: ${{ base_url }}/mercure_Darwin_arm64.tar.gz
+      sha256: edece1844d55cb5a477ec73df648966639ae42920f326bdb376269932385918d
+  - if: osx and x86_64
+    then:
+      url: ${{ base_url }}/mercure_Darwin_x86_64.tar.gz
+      sha256: ff67c414a50cc880e414cf01332ee5161acf9e1efc7b82a4c96ed788694ac6c3
+  - if: linux and x86_64
+    then:
+      url: ${{ base_url }}/mercure_Linux_x86_64.tar.gz
+      sha256: 8eab138b2dec58c807912376e4b61af5033a15cd9b5b4b45805492ef246e1d82
+  - if: linux and aarch64
+    then:
+      url: ${{ base_url }}/mercure_Linux_arm64.tar.gz
+      sha256: fc52f609dc9b859a64a0c6af73b241adaa0e737ed10c8127674ec4b6cbeb5f8b
+
+build:
+  number: 0
+  skip:
+    - win
+  dynamic_linking:
+    # Upstream ships static Go (Caddy) binaries; rewriting them would break the macOS signature.
+    binary_relocation: false
+  script:
+    - mkdir -p $PREFIX/bin $PREFIX/share/mercure
+    - install -m 755 mercure $PREFIX/bin/mercure
+    - install -m 644 Caddyfile dev.Caddyfile $PREFIX/share/mercure/
+
+tests:
+  - package_contents:
+      bin:
+        - mercure
+      files:
+        - share/mercure/Caddyfile
+        - share/mercure/dev.Caddyfile
+  - script:
+      - mercure version
+
+about:
+  homepage: https://mercure.rocks
+  repository: https://github.com/dunglas/mercure
+  license: AGPL-3.0-or-later
+  license_file: LICENSE
+  summary: Mercure.rocks hub (Caddy build), repackaged from upstream release binaries; same version as the dunglas/mercure Compose image
