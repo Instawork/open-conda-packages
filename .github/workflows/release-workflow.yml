@@ -46,5 +46,4 @@ jobs:
         if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
         shell: bash
         run: |
-          find output -name '*.conda' -print0 |
-            xargs -0 -n1 pixi run rattler-build upload prefix -c instawork/instawork-packages --skip-existing
+          pixi upload prefix --channel instawork/instawork-packages --skip-existing $(find output -name '*.conda')
