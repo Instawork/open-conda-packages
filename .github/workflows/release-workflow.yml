@@ -26,6 +26,16 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Reject paid Anaconda channels
+        shell: bash
+        run: |
+          if grep -rnE 'repo\.anaconda\.com|conda\.anaconda\.org/(main|r|msys2|anaconda)([^A-Za-z0-9_-]|$)|anaconda\.org/anaconda([^A-Za-z0-9_-]|$)|pkgs/(main|r|msys2)([^A-Za-z0-9_-]|$)|continuumio/(mini)?conda|Miniconda3-|Anaconda3-|channels\s*=\s*\[[^]]*["'"'"'](defaults|main|r|msys2)["'"'"']|channel\s*=\s*["'"'"'](defaults|main|r|msys2)["'"'"']|(-c|--channel)\s+(defaults|main|r|msys2)\b' \
+              --include='*.toml' --include='*.lock' --include='*.yaml' --include='*.yml' \
+              --exclude='release-workflow.yml' .; then
+            echo "Paid Anaconda channel found. Use conda-forge or prefix.dev." >&2
+            exit 1
+          fi
+
       - uses: prefix-dev/setup-pixi@v0.8.0
         with:
           pixi-version: v0.76.2
