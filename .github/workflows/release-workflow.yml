@@ -1,13 +1,25 @@
 name: release
 
 on:
-  release:
-    types: [published]
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
   workflow_dispatch:
 
 jobs:
   build-and-upload:
-    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            platform: linux-64
+          - os: ubuntu-24.04-arm
+            platform: linux-aarch64
+          - os: macos-15
+            platform: osx-arm64
+    runs-on: ${{ matrix.os }}
     permissions:
       contents: read
       id-token: write
@@ -16,7 +28,15 @@ jobs:
 
       - uses: prefix-dev/setup-pixi@v0.8.0
         with:
-          run-install: false
+          pixi-version: v0.76.2
 
       - run: pixi run build
-      - run: pixi upload prefix --channel instawork/instawork-packages ./*.conda
+
+      - name: Upload to prefix.dev
+        if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+        shell: bash
+        run: |
+          shopt -s globstar nullglob
+          for pkg in output/**/*.conda; do
+            pixi run rattler-build upload prefix -c instawork/instawork-packages --skip-existing "$pkg"
+          done
