@@ -1,0 +1,19 @@
+.github/CODEOWNERS
+  s_fd528823e8d35d::t_a754eb41925619 1
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "3550c451b53b5a04043acbe25573aeea4623bfbd",
+  "prompts": {},
+  "sessions": {
+    "s_fd528823e8d35d": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "",
+        "model": "unknown"
+      },
+      "human_author": "Eric Hagman <eric@instawork.com>"
+    }
+  }
+}
